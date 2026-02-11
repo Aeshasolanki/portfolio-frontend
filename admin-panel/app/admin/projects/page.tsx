@@ -1,10 +1,10 @@
 "use client";
 
-
+import AdminNavbar from "@/app/AdminNavbar";
 import { useEffect, useState } from "react";
 
 export default function AdminProjects() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [icon, setIcon] = useState<File | null>(null);
 
   const [form, setForm] = useState({
@@ -17,10 +17,17 @@ export default function AdminProjects() {
     app_store_url: "",
   });
 
+  // Replace with your deployed backend URL
+  const BASE_URL = "https://portfolio-backend-clhc.onrender.com";
+
   const fetchProjects = async () => {
-    const res = await fetch("http://localhost:5000/api/apps");
-    const data = await res.json();
-    setProjects(data);
+    try {
+      const res = await fetch(`${BASE_URL}/api/apps`);
+      const data = await res.json();
+      setProjects(data);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+    }
   };
 
   useEffect(() => {
@@ -33,41 +40,47 @@ export default function AdminProjects() {
 
   const addProject = async () => {
     const formData = new FormData();
-
     Object.entries(form).forEach(([key, value]) => {
       formData.append(key, value as string);
     });
 
     if (icon) formData.append("icon", icon);
 
-    await fetch("https://portfolio-backend-clhc.onrender.com/api/apps", {
-      method: "POST",
-      body: formData,
-    });
-
-    setForm({
-      name: "",
-      slug: "",
-      category: "",
-      tagline: "",
-      description: "",
-      description_secondary: "",
-      app_store_url: "",
-    });
-    setIcon(null);
-    fetchProjects();
+    try {
+      await fetch(`${BASE_URL}/api/apps`, {
+        method: "POST",
+        body: formData,
+      });
+      setForm({
+        name: "",
+        slug: "",
+        category: "",
+        tagline: "",
+        description: "",
+        description_secondary: "",
+        app_store_url: "",
+      });
+      setIcon(null);
+      fetchProjects();
+    } catch (err) {
+      console.error("Error adding project:", err);
+    }
   };
 
   const deleteProject = async (id: number) => {
-    await fetch(`https://portfolio-backend-clhc.onrender.com/api/apps/${id}`, {
-      method: "DELETE",
-    });
-    fetchProjects();
+    try {
+      await fetch(`${BASE_URL}/api/apps/${id}`, {
+        method: "DELETE",
+      });
+      fetchProjects();
+    } catch (err) {
+      console.error("Error deleting project:", err);
+    }
   };
 
   return (
     <div className="p-10 bg-gray-900 min-h-screen text-white">
-     
+      <AdminNavbar />
       <h1 className="text-4xl font-bold mb-8">Admin Panel</h1>
 
       {/* ===== Add Project Form ===== */}
@@ -120,45 +133,50 @@ export default function AdminProjects() {
               </tr>
             </thead>
             <tbody>
-              {projects.map((p: any) => (
-                <tr key={p.id} className="border-t border-gray-700 hover:bg-gray-700">
-                  <td className="p-3">{p.id}</td>
-                  <td className="p-3">{p.name}</td>
-                  <td className="p-3">{p.slug}</td>
-                  <td className="p-3">{p.category}</td>
-                  <td className="p-3">{p.tagline}</td>
-                  <td className="p-3">{p.description}</td>
-                  <td className="p-3">{p.description_secondary}</td>
-                  <td className="p-3">
-                    <a
-                      href={p.app_store_url}
-                      target="_blank"
-                      className="text-blue-400 underline"
-                    >
-                      Link
-                    </a>
-                  </td>
-                  <td className="p-3">
-                    {p.icon_url ? (
-                      <img
-                        src={p.icon_url}
-                        alt={p.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                    ) : (
-                      "No icon"
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => deleteProject(p.id)}
-                      className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded font-semibold"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {projects
+                .filter((p) => p.name) // optional: skip empty projects
+                .map((p) => (
+                  <tr key={p.id} className="border-t border-gray-700 hover:bg-gray-700">
+                    <td className="p-3">{p.id}</td>
+                    <td className="p-3">{p.name}</td>
+                    <td className="p-3">{p.slug}</td>
+                    <td className="p-3">{p.category}</td>
+                    <td className="p-3">{p.tagline}</td>
+                    <td className="p-3">{p.description}</td>
+                    <td className="p-3">{p.description_secondary}</td>
+                    <td className="p-3">
+                      <a
+                        href={p.app_store_url}
+                        target="_blank"
+                        className="text-blue-400 underline"
+                      >
+                        Link
+                      </a>
+                    </td>
+                    <td className="p-3">
+                      {p.icon_url ? (
+                        <img
+                          src={p.icon_url.replace(
+                            "localhost:5000",
+                            "portfolio-backend-clhc.onrender.com"
+                          )}
+                          alt={p.name || "Project Icon"}
+                          className="w-10 h-10 object-cover rounded"
+                        />
+                      ) : (
+                        "No icon"
+                      )}
+                    </td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => deleteProject(p.id)}
+                        className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded font-semibold"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               {projects.length === 0 && (
                 <tr>
                   <td colSpan={10} className="text-center p-4 text-gray-400">
