@@ -1,5 +1,5 @@
 "use client";
-
+import AdminNavbar from "../../AdminNavbar";
 
 import { useEffect, useState } from "react";
 
@@ -80,7 +80,7 @@ export default function AdminProjects() {
 
   return (
     <div className="p-10 bg-gray-900 min-h-screen text-white">
-     
+     <AdminNavbar/>
       <h1 className="text-4xl font-bold mb-8">Admin Panel</h1>
 
       {/* ===== Add Project Form ===== */}
