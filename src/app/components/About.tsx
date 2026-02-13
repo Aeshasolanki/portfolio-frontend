@@ -101,7 +101,7 @@ export default function CEOAboutPage() {
           <motion.h2 variants={item} className="font-[var(--font-title)] text-[clamp(3rem,8vw,6rem)] font-black tracking-[-0.04em] uppercase leading-[0.85] mx-auto">
             Crafting{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-blue-400 to-blue-700">
-              Global
+              Globals
             </span>{" "}
             <br />
             Enterprises.

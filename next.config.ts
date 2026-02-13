@@ -2,8 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["images.pexels.com"],
+    domains: ['portfolio-backend-clhc.onrender.com'],
+    
   },
+  
 };
 
 export default nextConfig;

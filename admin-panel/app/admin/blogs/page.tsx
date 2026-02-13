@@ -1,5 +1,7 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Blog {
   id: number;
@@ -10,22 +12,13 @@ interface Blog {
   author_name: string;
   category: string;
   status: string;
+  image_url?: string;
 }
 
 export default function AdminBlogs() {
+  const router = useRouter();
   const API_URL = "https://portfolio-backend-clhc.onrender.com/api/blogs";
-
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [form, setForm] = useState({
-    title: "",
-    slug: "",
-    short_description: "",
-    content: "",
-    author_name: "",
-    category: "",
-    status: "published",
-    image: null as File | null,
-  });
 
   useEffect(() => {
     fetchBlogs();
@@ -38,146 +31,105 @@ export default function AdminBlogs() {
       setBlogs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch blogs:", err);
+      setBlogs([]);
     }
   };
 
-  const handleChange = (e: any) => {
-    if (e.target.type === "file") {
-      setForm({ ...form, [e.target.name]: e.target.files?.[0] ?? null });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value || "" });
-    }
-  };
-
-  const addBlog = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("title", form.title);
-      formData.append("slug", form.slug);
-      formData.append("short_description", form.short_description);
-      formData.append("content", form.content);
-      formData.append("author_name", form.author_name);
-      formData.append("category", form.category);
-      formData.append("status", form.status);
-      if (form.image) formData.append("image", form.image);
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Failed to add blog");
-
-      setForm({
-        title: "",
-        slug: "",
-        short_description: "",
-        content: "",
-        author_name: "",
-        category: "",
-        status: "published",
-        image: null,
-      });
-      fetchBlogs();
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
+  const goToEdit = (id: number) => router.push(`/admin/blogs/${id}/edit`);
 
   const deleteBlog = async (id: number) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
-
     try {
-      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete blog");
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
       fetchBlogs();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white p-10">
-      <h1 className="text-4xl font-bold mb-6">Blogs Admin</h1>
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0f1a] to-[#0f122a] text-white px-6 py-12">
+      <div className="max-w-7xl mx-auto space-y-12">
 
-      {/* Add Blog Form */}
-      <div className="grid md:grid-cols-2 gap-4 mb-6">
-        {Object.keys(form).map((key) =>
-          key === "content" || key === "short_description" ? (
-            <textarea
-              key={key}
-              name={key}
-              value={(form as any)[key] || ""}
-              onChange={handleChange}
-              rows={4}
-              placeholder={key}
-              className="border p-3 md:col-span-2 bg-black"
-            />
-          ) : key === "image" ? (
-            <input
-              key={key}
-              name={key}
-              type="file"
-              accept="image/*"
-              onChange={handleChange}
-              className="border p-3 bg-black"
-            />
-          ) : (
-            <input
-              key={key}
-              name={key}
-              value={(form as any)[key] || ""}
-              onChange={handleChange}
-              placeholder={key}
-              className="border p-3 bg-black"
-            />
-          )
-        )}
-      </div>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">
+              📝 Blogs Admin
+            </h1>
+            <p className="text-gray-400">Manage and organize your portfolio blogs</p>
+          </div>
+          <Link
+            href="/admin/blogs/new"
+            className="px-6 py-3 rounded-2xl font-semibold text-black bg-cyan-400 hover:bg-cyan-500 transition"
+          >
+            + Add Blog
+          </Link>
+        </div>
 
-      <button onClick={addBlog} className="bg-cyan-500 px-6 py-2 text-black mb-10">
-        Add Blog
-      </button>
+        {/* Blogs List */}
+        <div className="space-y-6">
+          {blogs.length > 0 ? (
+            blogs.map((b) => (
+              <div
+                key={b.id}
+                className="bg-[#0f172a]/70 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:shadow-lg hover:shadow-cyan-400/40 transition cursor-pointer"
+                onClick={() => goToEdit(b.id)}
+              >
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Blog Image */}
+                  {b.image_url && (
+                    <img
+                      src={b.image_url.replace("localhost:5000", "portfolio-backend-clhc.onrender.com")}
+                      alt={b.title}
+                      className="w-full md:w-28 h-28 object-cover rounded-2xl border border-white/10"
+                    />
+                  )}
 
-      {/* Blogs Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-black border border-gray-700">
-          <thead>
-            <tr className="bg-gray-800">
-              <th className="py-2 px-4 border-b">ID</th>
-              <th className="py-2 px-4 border-b">Title</th>
-              <th className="py-2 px-4 border-b">Slug</th>
-              <th className="py-2 px-4 border-b">Short Description</th>
-              <th className="py-2 px-4 border-b">Content</th>
-              <th className="py-2 px-4 border-b">Author</th>
-              <th className="py-2 px-4 border-b">Category</th>
-              <th className="py-2 px-4 border-b">Status</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {blogs.map((b) => (
-              <tr key={b.id} className="hover:bg-gray-900">
-                <td className="py-2 px-4 border-b">{b.id}</td>
-                <td className="py-2 px-4 border-b">{b.title}</td>
-                <td className="py-2 px-4 border-b">{b.slug}</td>
-                <td className="py-2 px-4 border-b">{b.short_description}</td>
-                <td className="py-2 px-4 border-b">{b.content}</td>
-                <td className="py-2 px-4 border-b">{b.author_name}</td>
-                <td className="py-2 px-4 border-b">{b.category}</td>
-                <td className="py-2 px-4 border-b">{b.status}</td>
-                <td className="py-2 px-4 border-b">
+                  {/* Blog Details */}
+                  <div className="flex-1 space-y-2">
+                    <h3 className="text-2xl font-bold text-cyan-400">{b.title}</h3>
+                    <p className="text-gray-300 line-clamp-2">{b.short_description}</p>
+
+                    <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-400">
+                      <p><span className="text-purple-400">Slug:</span> {b.slug}</p>
+                      <p><span className="text-purple-400">Category:</span> {b.category}</p>
+                    </div>
+
+                    <p className="text-gray-400 line-clamp-3">{b.content}</p>
+
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
+                      <p><span className="text-cyan-400">Author:</span> {b.author_name}</p>
+                      <p><span className="text-cyan-400">Status:</span> {b.status}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-4 flex gap-3 justify-end">
+                  <Link
+                    href={`/admin/blogs/${b.id}/edit`}
+                    className="px-5 py-2 rounded-2xl font-semibold text-white bg-slate-700 hover:bg-slate-600 transition"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Edit
+                  </Link>
                   <button
-                    onClick={() => deleteBlog(b.id)}
-                    className="bg-red-500 px-3 py-1 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteBlog(b.id);
+                    }}
+                    className="px-5 py-2 rounded-2xl font-semibold text-white bg-red-600 hover:bg-red-500 transition"
                   >
                     Delete
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 py-20 text-lg">No blogs found</p>
+          )}
+        </div>
       </div>
     </div>
   );
