@@ -11,7 +11,7 @@ export default function ProjectCard({project}:any){
 
    <div className="w-1/2">
     <img
-     src={`http://localhost:5000/uploads/${project.image_url}`}
+     src={`https://portfolio-backend-clhc.onrender.com/uploads/${project.image_url}`}
      className="rounded-xl"
     />
    </div>

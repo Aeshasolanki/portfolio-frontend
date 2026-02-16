@@ -1,5 +1,18 @@
 {
   "projects": {
-    "default": "portfoliooadmin"
-  }
+    "default": "adminpanelportfolio"
+  },
+  "targets": {
+    "adminpanelportfolio": {
+      "hosting": {
+        "portfolio": [
+          "portfolio-123"
+        ],
+        "admin": [
+          "adminpanel-panel"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

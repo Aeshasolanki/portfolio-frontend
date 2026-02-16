@@ -138,20 +138,21 @@ export default function ProjectSection({ limit }: ProjectSectionProps) {
               </div>
 
               {/* Right side - Image with extra space */}
-              <div className="flex justify-center md:justify-end md:ml-16">
-                <img
-                  src={
-                    project.icon_url?.includes("localhost")
-                      ? project.icon_url.replace(
-                          "http://localhost:5000",
-                          "https://portfolio-backend-clhc.onrender.com"
-                        )
-                      : project.icon_url
-                  }
-                  alt={project.name}
-                  className="w-80 h-80 object-contain"
-                />
-              </div>
+             <div className="flex justify-center md:justify-end md:ml-16">
+  <img
+    src={
+      project.icon_url?.includes("localhost")
+        ? project.icon_url.replace(
+            "http://localhost:5000",
+            "https://portfolio-backend-clhc.onrender.com"
+          )
+        : project.icon_url
+    }
+    alt={project.name}
+    className="w-[366px] h-[366px] object-cover rounded-[100px]"
+  />
+</div>
+
             </motion.div>
           </div>
         ))}
